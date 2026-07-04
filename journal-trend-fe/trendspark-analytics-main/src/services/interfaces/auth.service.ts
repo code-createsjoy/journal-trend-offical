@@ -1,0 +1,11 @@
+import type { AuthSession, LoginCredentials, RegisterCredentials } from "@/auth/types";
+
+export interface AuthService {
+  login(credentials: LoginCredentials): Promise<AuthSession>;
+  register(data: RegisterCredentials): Promise<void>;
+  logout(): Promise<void>;
+  getSession(): Promise<AuthSession | null>;
+  updateProfile(fullName: string): Promise<AuthSession>;
+  forgotPassword(email: string): Promise<void>;
+  resetPassword(token: string, newPassword: string): Promise<void>;
+}

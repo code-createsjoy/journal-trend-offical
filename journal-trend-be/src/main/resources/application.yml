@@ -1,0 +1,152 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  config:
+    import: optional:classpath:application-local.yml
+  application:
+    name: journal-trend-be
+  http:
+    converters:
+      preferred-json-mapper: jackson
+  datasource:
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=journal_trend_db;encrypt=true;trustServerCertificate=true}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:12345}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: ${JPA_SHOW_SQL:false}
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        format_sql: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:haxuantien191@gmail.com}
+    password: ${MAIL_PASSWORD:auvfspebpbfivujc}
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:true}
+
+app:
+  cors-allowed-origins: ${CORS_ORIGIN:http://localhost:5173,http://localhost:5174}
+  frontend-base-url: ${FRONTEND_URL:http://localhost:5173}
+  backend-base-url: ${BACKEND_URL:http://localhost:8080}
+  jwt:
+    access-secret: ${JWT_ACCESS_SECRET:change-access-secret-min-32-characters-long!!}
+    refresh-secret: ${JWT_REFRESH_SECRET:change-refresh-secret-min-32-characters-long!}
+    access-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
+  password-reset-expiration-minutes: 30
+  email-verification-expiration-minutes: ${EMAIL_VERIFICATION_EXPIRATION_MINUTES:1440}
+  rate-limit-per-minute: 60
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-2.0-flash}
+    max-output-tokens: ${GEMINI_MAX_TOKENS:1024}
+  openalex:
+    base-url: https://api.openalex.org
+    # mailto: ${OPENALEX_MAILTO:research@example.com}
+    mailto: ${OPENALEX_MAILTO:quocthaiarct2005@gmail.com}
+    per-page: ${OPENALEX_PER_PAGE:200}
+    api-key: ${OPENALEX_API_KEY:r2ywilzU3nvjc7e8VVrELN}
+  sync:
+    cron: ${SYNC_CRON:0 0 2 * * *}
+    on-startup: ${SYNC_ON_STARTUP:false}
+    min-keyword-papers: ${MIN_KEYWORD_PAPERS:5}
+    trending-threshold-percent: ${TRENDING_THRESHOLD:15}
+    trending-consecutive-months: ${TRENDING_CONSECUTIVE_MONTHS:3}
+    max-pages: ${SYNC_MAX_PAGES:40}
+    max-papers-per-run: ${SYNC_MAX_PAPERS_PER_RUN:1000}
+    from-publication-date: ${SYNC_FROM_PUBLICATION_DATE:2026-04-01}
+    ingest-batch-size: ${SYNC_INGEST_BATCH_SIZE:25}
+    enrich-on-sync: ${SYNC_ENRICH_ON_SYNC:false}
+    enrich-batch-size: ${SYNC_ENRICH_BATCH_SIZE:20}
+    enrich-delay-ms: ${SYNC_ENRICH_DELAY_MS:50}
+    stale-sync-minutes: ${SYNC_STALE_MINUTES:60}
+    http-connect-timeout-ms: ${SYNC_HTTP_CONNECT_TIMEOUT_MS:10000}
+    http-read-timeout-ms: ${SYNC_HTTP_READ_TIMEOUT_MS:30000}
+    open-alex-retry-attempts: ${SYNC_OPENALEX_RETRIES:3}
+    max-follow-keywords-per-user: ${MAX_FOLLOW_KEYWORDS:20}
+    allowed-keyword-domains:
+      - Computer Science
+      - Mathematics
+      - Engineering
+      - Artificial Intelligence
+      - Machine Learning
+      - Computer Vision and Pattern Recognition
+      - Natural Language Processing
+      - Human-Computer Interaction
+      - Computer Networks and Communications
+      - Software Engineering
+      - Information Systems
+      - Database Management
+      - Theoretical Computer Science
+      - Data Mining and Knowledge Discovery
+      - Computer Security and Cryptography
+      - Robotics
+      - Computer Graphics and Computer-Aided Design
+      - Hardware and Architecture
+      - Statistics and Probability
+      - Applied Mathematics
+      - Computational Mathematics
+      - Information Science
+      - Electrical and Electronic Engineering
+      - Control and Systems Engineering
+    max-follow-journals-per-user: ${MAX_FOLLOW_JOURNALS:10}
+    max-follow-authors-per-user: ${MAX_FOLLOW_AUTHORS:20}
+    max-bookmark-papers-per-user: ${MAX_BOOKMARK_PAPERS:200}
+    anomaly-threshold-percent: ${ANOMALY_THRESHOLD_PERCENT:300}
+    pending-review-expiry-days: ${PENDING_REVIEW_EXPIRY_DAYS:30}
+    trend-backfill-months: ${TREND_BACKFILL_MONTHS:12}
+    overlap-days: ${SYNC_OVERLAP_DAYS:7}
+    early-stopping-enabled: ${SYNC_EARLY_STOPPING:true}
+    early-stop-consecutive-empty-pages: ${SYNC_EARLY_STOP_PAGES:3}
+    forecast-cron: ${FORECAST_CRON:0 0 4 1 * *}
+    forecast-min-months: ${FORECAST_MIN_MONTHS:6}
+    forecast-history-window: ${FORECAST_HISTORY_WINDOW:12}
+    forecast-horizon: ${FORECAST_HORIZON:6}
+    forecast-max-keywords: ${FORECAST_MAX_KEYWORDS:200}
+    forecast-weight-slope: ${FORECAST_WEIGHT_SLOPE:0.5}
+    forecast-weight-acc: ${FORECAST_WEIGHT_ACC:0.3}
+    forecast-weight-volume: ${FORECAST_WEIGHT_VOLUME:0.2}
+    search-queries:
+      - artificial intelligence
+      - machine learning
+      - deep learning
+      - Generative AI
+      - Large Language Models
+      - Robotics
+      - Data Science              
+
+  scheduler-enabled: ${SCHEDULER_ENABLED:true}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+logging:
+  level:
+    com.norman.swp391: INFO
+    org.hibernate.SQL: WARN

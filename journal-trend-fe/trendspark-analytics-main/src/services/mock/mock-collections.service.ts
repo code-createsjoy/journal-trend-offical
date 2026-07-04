@@ -1,0 +1,114 @@
+import type {
+  CollectionsService,
+  CreateCollectionInput,
+  SavePaperToCollectionsInput,
+  RemovePaperFromCollectionInput,
+  UpdateCollectionInput,
+} from "@/services/interfaces/collections.service";
+import { MOCK_COLLECTIONS } from "@/mocks/data/collections";
+import type { Collection } from "@/types/domain";
+import { mockDelay } from "@/services/utils";
+import { hashSeed } from "@/mocks/deterministic";
+
+let db: Collection[] = [...MOCK_COLLECTIONS];
+
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+function normalizeName(name: string): string {
+  return name.trim().replace(/\s+/g, " ");
+}
+
+export class MockCollectionsService implements CollectionsService {
+  async list() {
+    await mockDelay(150);
+    return [...db].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  }
+
+  async getById(id: string) {
+    await mockDelay(100);
+    return db.find((c) => c.id === id) ?? null;
+  }
+
+  async create(input: CreateCollectionInput) {
+    await mockDelay(250);
+    const name = normalizeName(input.name);
+    if (!name) throw new Error("Collection name is required");
+    if (db.some((c) => c.name.toLowerCase() === name.toLowerCase())) {
+      throw new Error("A collection with this name already exists");
+    }
+
+    const created: Collection = {
+      id: `col_${hashSeed(name)}`,
+      name,
+      paperIds: [],
+      updatedAt: nowIso(),
+    };
+
+    db = [created, ...db];
+    return created;
+  }
+
+  async update(id: string, input: UpdateCollectionInput) {
+    await mockDelay(250);
+    const idx = db.findIndex((c) => c.id === id);
+    if (idx === -1) throw new Error("Collection not found");
+
+    const name = normalizeName(input.name);
+    if (!name) throw new Error("Collection name is required");
+    if (db.some((c) => c.id !== id && c.name.toLowerCase() === name.toLowerCase())) {
+      throw new Error("A collection with this name already exists");
+    }
+
+    const updated: Collection = { ...db[idx], name, updatedAt: nowIso() };
+    db = db.map((c) => (c.id === id ? updated : c));
+    return updated;
+  }
+
+  async delete(id: string) {
+    await mockDelay(250);
+    const exists = db.some((c) => c.id === id);
+    if (!exists) throw new Error("Collection not found");
+    db = db.filter((c) => c.id !== id);
+    return { id };
+  }
+
+  async savePaperToCollections(input: SavePaperToCollectionsInput) {
+    await mockDelay(200);
+    const { paperId, collectionIds } = input;
+    if (!paperId) throw new Error("paperId is required");
+    if (!Array.isArray(collectionIds) || collectionIds.length === 0) return this.list();
+
+    const now = nowIso();
+    const targetSet = new Set(collectionIds);
+
+    db = db.map((c) => {
+      if (!targetSet.has(c.id)) return c;
+      if (c.paperIds.includes(paperId)) return c;
+      return { ...c, paperIds: [...c.paperIds, paperId], updatedAt: now };
+    });
+
+    return this.list();
+  }
+
+  async removePaperFromCollection(input: RemovePaperFromCollectionInput) {
+    await mockDelay(180);
+    const { paperId, collectionId } = input;
+    const idx = db.findIndex((c) => c.id === collectionId);
+    if (idx === -1) throw new Error("Collection not found");
+
+    const c = db[idx];
+    if (!c.paperIds.includes(paperId)) return c;
+
+    const updated: Collection = {
+      ...c,
+      paperIds: c.paperIds.filter((id) => id !== paperId),
+      updatedAt: nowIso(),
+    };
+
+    db = db.map((x) => (x.id === collectionId ? updated : x));
+    return updated;
+  }
+}
+
